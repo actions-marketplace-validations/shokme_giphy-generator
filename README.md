@@ -31,7 +31,7 @@ jobs:
     steps:
       - name: Giphy Generator
         id: giphy_generator
-        uses: shokme/giphy-generator@v1
+        uses: shokme/giphy-generator@v1.1
         env:
           GIPHY_TOKEN: ${{ secrets.GIPHY_TOKEN }}
   discordNotification:
