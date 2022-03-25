@@ -1,4 +1,4 @@
-name: 'GIPHY Generator'
+name: 'GIPHY Url Generator'
 description: 'return action outputs.url to be combined with another action like slack notification'
 author: 'shokme'
 inputs:
