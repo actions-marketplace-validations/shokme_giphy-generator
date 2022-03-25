@@ -11,13 +11,13 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/iamhughes/giphy-generator"
+    "url": "git+https://github.com/shokme/giphy-generator"
   },
   "keywords": [
     "actions",
     "node"
   ],
-  "author": "IAmHughes",
+  "author": "shokme",
   "license": "GNU",
   "dependencies": {
     "@actions/core": "^1.0.0",
