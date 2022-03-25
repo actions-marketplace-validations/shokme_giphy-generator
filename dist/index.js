@@ -3689,11 +3689,14 @@ const axios = __webpack_require__(53).default;
 
 async function run() {
   try {
-    const limit = 25;
+    const query = core.getInput('query', {required: true});
+    const limit = core.getInput('limit', {required: false, });
+    const lang = core.getInput('lang', {required: false});
+    const rating = core.getInput('rating', {required: false});
 
     // eslint-disable-next-line no-await-in-loop
     const searchForGifResponse = await axios.get(
-      `https://api.giphy.com/v1/gifs/search?api_key=${process.env.GIPHY_TOKEN}&q=coffee%20time&limit=${limit}&offset=0&lang=en`
+      `https://api.giphy.com/v1/gifs/search?api_key=${process.env.GIPHY_TOKEN}&q=${query}&limit=${limit}&offset=0&rating=${rating}&lang=${lang}`
     );
 
     core.debug('Successfully queried GIPHY');

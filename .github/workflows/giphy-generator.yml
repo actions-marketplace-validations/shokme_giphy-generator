@@ -14,6 +14,11 @@ jobs:
         uses: shokme/giphy-generator@master
         env:
           GIPHY_TOKEN: ${{ secrets.GIPHY_TOKEN }} # This token should be created on giphy.com: https://developers.giphy.com/dashboard/?create=true
+        with:
+          limit: 2
+          lang: 'en'
+          query: 'coffe time'
+          rating: 'g'
   get-url:
     runs-on: ubuntu-latest
     needs: giphy-generator
