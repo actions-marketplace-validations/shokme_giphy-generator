@@ -6,9 +6,16 @@ jobs:
   giphy-generator:
     name: GIPHY Generator
     runs-on: ubuntu-latest
+    outputs:
+      url: ${{ steps.giphy_generator.outputs.url }}
     steps:
       - name: GIPHY Generator
         id: giphy_generator
         uses: shokme/giphy-generator@master
         env:
           GIPHY_TOKEN: ${{ secrets.GIPHY_TOKEN }} # This token should be created on giphy.com: https://developers.giphy.com/dashboard/?create=true
+  get-url:
+    runs-on: ubuntu-latest
+    needs: giphy-generator
+    steps:
+      - run: echo ${{ needs.giphy-generator.outputs.url }}
