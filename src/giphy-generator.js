@@ -1,89 +1,29 @@
 const core = require('@actions/core');
-const {GitHub, context} = require('@actions/github');
 const axios = require('axios').default;
 
 async function run() {
   try {
-    // Get authenticated GitHub client (Ocktokit): https://github.com/actions/toolkit/tree/master/packages/github#usage
-    const github = new GitHub(process.env.GITHUB_TOKEN);
-
-    // Get owner, repo, and event from context of payload that triggered the action
-    const {owner, repo} = context.repo;
-
-    // Get the inputs from the workflow file: https://github.com/actions/toolkit/tree/master/packages/core#inputsoutputs
-    const rating = core.getInput('rating', {required: false});
-    const lang = core.getInput('lang', {required: false});
     const limit = 25;
-    const command = '/giphy';
 
-    const event_type = context.eventName;
-    let issue_pr_number;
-    let body;
+    // eslint-disable-next-line no-await-in-loop
+    const searchForGifResponse = await axios.get(
+      `https://api.giphy.com/v1/gifs/search?api_key=${process.env.GIPHY_TOKEN}&q=coffee%20time&limit=${limit}&offset=0&lang=en`
+    );
 
-    // Parse body of issue or PR to look for `/giphy <search_term>` based on event type
-    // Pull request event
-    // Webhook Documentation: https://developer.github.com/v3/activity/events/types/#pullrequestevent
-    if (event_type === 'pull_request') {
-      issue_pr_number = context.payload.pull_request.number;
-      body = context.payload.pull_request.body;
+    core.debug('Successfully queried GIPHY');
 
-      core.debug(`${event_type} event triggered action, pr_number: ${issue_pr_number}, body: ${body}`)
-      // Issues event
-      // Webhook Documentation: https://developer.github.com/v3/activity/events/types/#issuesevent
-    } else if (event_type === 'issues') {
-      issue_pr_number = context.payload.issue.number;
-      body = context.payload.issue.body;
+    // Get the ID, title, and GIF URL for the GIF from the response
+    const gifIndex = Math.ceil(Math.random() * limit);
 
-      core.debug(`${event_type} event triggered action, issue_number: ${issue_pr_number}, body: ${body}`)
-      // Issue comment event
-      // Webhook Documentation: https://developer.github.com/v3/activity/events/types/#issuecommentevent
-    } else {
-      issue_pr_number = context.payload.issue.number;
-      body = context.payload.comment.body;
+    core.debug(`gifIndex picked is: ${gifIndex}`);
 
-      core.debug(`${event_type} event triggered action, issue_or_pr_number: ${issue_pr_number}, body: ${body}`)
-    }
+    const {
+      images: {
+        original: {url: gifUrl}
+      }
+    } = searchForGifResponse.data.data[gifIndex];
 
-    if (body.includes(command)) {
-      const index = body.lastIndexOf(command);
-      const query = body.substring(index + command.length).trim();
-      core.debug(`/giphy command found, query = ${query}`);
-
-      // Query GIPHY for a GIF!
-      // API Documentation: https://developers.giphy.com/docs/api/endpoint/#search
-      // eslint-disable-next-line no-await-in-loop
-      const searchForGifResponse = await axios.get(
-        `https://api.giphy.com/v1/gifs/search?api_key=${process.env.GIPHY_TOKEN}&q=${query}&limit=${limit}&offset=0&rating=${rating}&lang=${lang}`
-      );
-
-      core.debug(`Successfully queried GIPHY with query: ${query}, rating: ${rating}, and lang: ${lang}`);
-
-      // Get the ID, title, and GIF URL for the GIF from the response
-      const gifIndex = Math.ceil(Math.random() * limit);
-
-      core.debug(`gifIndex picked is: ${gifIndex}`);
-
-      const {
-        title: gifTitle,
-        images: {
-          original: {url: gifUrl}
-        }
-      } = searchForGifResponse.data.data[gifIndex];
-
-      // Create a comment
-      // API Documentation: https://developer.github.com/v3/issues/comments/#create-a-comment
-      // Octokit Documentation: https://octokit.github.io/rest.js/#octokit-routes-issues-create-comment
-      // eslint-disable-next-line no-await-in-loop
-      await github.issues.createComment({
-        owner,
-        repo,
-        issue_number: issue_pr_number,
-        body: `![${gifTitle}](${gifUrl})\n\n_Powered by GIPHY_`
-      });
-      core.debug(`Successfully created comment on #: ${issue_pr_number} with gifTitle: ${gifTitle} - ${gifUrl}`);
-    } else {
-      core.debug(`/giphy command not found in body: ${body}, exiting`);
-    }
+    return gifUrl
   } catch (error) {
     core.setFailed(error.message);
   }
