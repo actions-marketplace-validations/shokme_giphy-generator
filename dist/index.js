@@ -3709,7 +3709,7 @@ async function run() {
       }
     } = searchForGifResponse.data.data[gifIndex];
 
-    return `::set-output name=url::${gifUrl}`
+    return core.setOutput('url', gifUrl)
   } catch (error) {
     core.setFailed(error.message);
   }
